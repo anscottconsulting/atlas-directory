@@ -1,0 +1,20 @@
+# Dependencies & build output
+node_modules/
+dist/
+dist-ssr/
+.vite/
+*.tsbuildinfo
+
+# Environment / secrets
+.env
+.env.local
+*.local
+*.pem
+*.key
+
+# Operational notes specific to the live deployment — kept local on purpose.
+# Shared out of band, not through this repo.
+app/deploy/RUNBOOK.md
+
+# macOS
+.DS_Store

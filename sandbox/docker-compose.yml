@@ -1,0 +1,50 @@
+version: '3.8'
+services:
+  db:
+    image: postgres:15
+    container_name: hapi-db
+    environment:
+      POSTGRES_DB: hapi
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d hapi"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  hapi:
+    image: hapiproject/hapi:latest
+    container_name: hapi-fhir
+    ports:
+      - "8081:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      # Database connection
+      spring.datasource.url: jdbc:postgresql://db:5432/hapi
+      spring.datasource.username: admin
+      spring.datasource.password: password
+      spring.datasource.driverClassName: org.postgresql.Driver
+      spring.jpa.properties.hibernate.dialect: org.hibernate.dialect.PostgreSQLDialect
+      
+      # FHIR Version
+      hapi.fhir.fhir_version: R4
+
+      
+      # IMPORTANT: Enable IG Upload for Sequoia
+      hapi.fhir.ig_runtime_upload_enabled: true
+      
+      # Allow searching by custom extensions (needed for Directory)
+      hapi.fhir.auto_create_placeholder_reference_targets: true
+      hapi.fhir.allow_external_references: true
+      
+      # Auto-install US Core 6.1.0 (and its dependencies) on startup
+      hapi.fhir.implementationguides.us_core.name: hl7.fhir.us.core
+      hapi.fhir.implementationguides.us_core.version: 6.1.0
+      hapi.fhir.implementationguides.us_core.reloadExisting: "false"
+      hapi.fhir.implementationguides.us_core.installMode: STORE_AND_INSTALL
+

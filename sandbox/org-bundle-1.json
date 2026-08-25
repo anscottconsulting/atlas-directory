@@ -1,0 +1,359 @@
+{
+  "resourceType": "Bundle",
+  "type": "transaction",
+  "entry": [
+    {
+      "fullUrl": "urn:uuid:qhin-alpha",
+      "resource": {
+        "resourceType": "Organization",
+        "id": "qhin-alpha",
+        "extension": [
+          {
+            "url": "https://sequoiaproject.org/fhir/sphd/StructureDefinition/Domains",
+            "valueCoding": {
+              "system": "https://sequoiaproject.org/fhir/sphd/CodeSystem/Domains",
+              "code": "RCE",
+              "display": "RCE"
+            }
+          },
+          {
+            "url": "https://sequoiaproject.org/fhir/sphd/StructureDefinition/DelegationRole",
+            "valueCoding": {
+              "system": "https://sequoiaproject.org/fhir/sphd/CodeSystem/DelegationRoleCodes",
+              "code": "Principal",
+              "display": "Principal"
+            }
+          },
+          {
+            "url": "https://sequoiaproject.org/fhir/sphd/StructureDefinition/OrganizationNodeType",
+            "valueCoding": {
+              "system": "https://sequoiaproject.org/fhir/sphd/CodeSystem/OrganizationNodeTypeCS",
+              "code": "Initiator",
+              "display": "Initiator"
+            }
+          },
+          {
+            "url": "https://sequoiaproject.org/fhir/sphd/StructureDefinition/PurposesOfUse",
+            "valueCoding": {
+              "system": "https://sequoiaproject.org/fhir/sphd/CodeSystem/PurposeOfUse",
+              "code": "TREATMENT",
+              "display": "Treatment"
+            }
+          }
+        ],
+        "identifier": [
+          {
+            "use": "official",
+            "type": {
+              "coding": [
+                {
+                  "system": "https://sequoiaproject.org/fhir/sphd/CodeSystem/SequoiaIdentifierCodes",
+                  "code": "HCID"
+                }
+              ],
+              "text": "HCID"
+            },
+            "system": "http://www.hl7.org/oid/",
+            "value": "2.16.840.1.113883.3.QHIN-ALPHA"
+          }
+        ],
+        "active": true,
+        "type": [
+          {
+            "text": "QHIN"
+          }
+        ],
+        "name": "QHIN Alpha",
+        "address": [
+          {
+            "use": "work",
+            "line": ["100 Network Way"],
+            "city": "Washington",
+            "state": "DC",
+            "postalCode": "20001",
+            "country": "USA"
+          }
+        ]
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Organization/qhin-alpha"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:mercy-health-system",
+      "resource": {
+        "resourceType": "Organization",
+        "id": "mercy-health-system",
+        "extension": [
+          {
+            "url": "https://sequoiaproject.org/fhir/sphd/StructureDefinition/Domains",
+            "valueCoding": {
+              "system": "https://sequoiaproject.org/fhir/sphd/CodeSystem/Domains",
+              "code": "RCE",
+              "display": "RCE"
+            }
+          },
+          {
+            "url": "https://sequoiaproject.org/fhir/sphd/StructureDefinition/DelegationRole",
+            "valueCoding": {
+              "system": "https://sequoiaproject.org/fhir/sphd/CodeSystem/DelegationRoleCodes",
+              "code": "Principal",
+              "display": "Principal"
+            }
+          },
+          {
+            "url": "https://sequoiaproject.org/fhir/sphd/StructureDefinition/PurposesOfUse",
+            "valueCoding": {
+              "system": "https://sequoiaproject.org/fhir/sphd/CodeSystem/PurposeOfUse",
+              "code": "TREATMENT",
+              "display": "Treatment"
+            }
+          }
+        ],
+        "identifier": [
+          {
+            "use": "official",
+            "type": {
+              "coding": [
+                {
+                  "system": "https://sequoiaproject.org/fhir/sphd/CodeSystem/SequoiaIdentifierCodes",
+                  "code": "HCID"
+                }
+              ],
+              "text": "HCID"
+            },
+            "system": "http://www.hl7.org/oid/",
+            "value": "2.16.840.1.113883.3.MERCY-HS"
+          }
+        ],
+        "active": true,
+        "type": [
+          {
+            "text": "Participant"
+          }
+        ],
+        "name": "Mercy Health System",
+        "address": [
+          {
+            "use": "work",
+            "line": ["500 Hospital Drive"],
+            "city": "Saint Louis",
+            "state": "MO",
+            "postalCode": "63101",
+            "country": "USA"
+          }
+        ],
+        "partOf": {
+          "reference": "Organization/qhin-alpha",
+          "display": "QHIN Alpha"
+        }
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Organization/mercy-health-system"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:mercy-memorial",
+      "resource": {
+        "resourceType": "Organization",
+        "id": "mercy-memorial",
+        "extension": [
+          {
+            "url": "https://sequoiaproject.org/fhir/sphd/StructureDefinition/Domains",
+            "valueCoding": {
+              "system": "https://sequoiaproject.org/fhir/sphd/CodeSystem/Domains",
+              "code": "RCE",
+              "display": "RCE"
+            }
+          },
+          {
+            "url": "https://sequoiaproject.org/fhir/sphd/StructureDefinition/DelegationRole",
+            "valueCoding": {
+              "system": "https://sequoiaproject.org/fhir/sphd/CodeSystem/DelegationRoleCodes",
+              "code": "Both",
+              "display": "Both"
+            }
+          },
+          {
+            "url": "https://sequoiaproject.org/fhir/sphd/StructureDefinition/DOA",
+            "valueReference": {
+              "reference": "Organization/healthtech-partners",
+              "display": "HealthTech Partners LLC"
+            }
+          }
+        ],
+        "identifier": [
+          {
+            "use": "official",
+            "type": {
+              "coding": [
+                {
+                  "system": "https://sequoiaproject.org/fhir/sphd/CodeSystem/SequoiaIdentifierCodes",
+                  "code": "HCID"
+                }
+              ],
+              "text": "HCID"
+            },
+            "system": "http://www.hl7.org/oid/",
+            "value": "2.16.840.1.113883.3.MERCY-MEMORIAL"
+          }
+        ],
+        "active": true,
+        "type": [
+          {
+            "text": "Subparticipant"
+          }
+        ],
+        "name": "Mercy Memorial Hospital",
+        "address": [
+          {
+            "use": "work",
+            "line": ["1234 Memorial Blvd"],
+            "city": "Saint Louis",
+            "state": "MO",
+            "postalCode": "63110",
+            "country": "USA"
+          }
+        ],
+        "partOf": {
+          "reference": "Organization/mercy-health-system",
+          "display": "Mercy Health System"
+        }
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Organization/mercy-memorial"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:mercy-clinic-north",
+      "resource": {
+        "resourceType": "Organization",
+        "id": "mercy-clinic-north",
+        "extension": [
+          {
+            "url": "https://sequoiaproject.org/fhir/sphd/StructureDefinition/Domains",
+            "valueCoding": {
+              "system": "https://sequoiaproject.org/fhir/sphd/CodeSystem/Domains",
+              "code": "RCE",
+              "display": "RCE"
+            }
+          },
+          {
+            "url": "https://sequoiaproject.org/fhir/sphd/StructureDefinition/DelegationRole",
+            "valueCoding": {
+              "system": "https://sequoiaproject.org/fhir/sphd/CodeSystem/DelegationRoleCodes",
+              "code": "Principal",
+              "display": "Principal"
+            }
+          }
+        ],
+        "identifier": [
+          {
+            "use": "official",
+            "type": {
+              "coding": [
+                {
+                  "system": "https://sequoiaproject.org/fhir/sphd/CodeSystem/SequoiaIdentifierCodes",
+                  "code": "HCID"
+                }
+              ],
+              "text": "HCID"
+            },
+            "system": "http://www.hl7.org/oid/",
+            "value": "2.16.840.1.113883.3.MERCY-CLINIC-NORTH"
+          }
+        ],
+        "active": true,
+        "type": [
+          {
+            "text": "Subparticipant"
+          }
+        ],
+        "name": "Mercy Clinic North",
+        "address": [
+          {
+            "use": "work",
+            "line": ["8800 North Park Avenue"],
+            "city": "Saint Louis",
+            "state": "MO",
+            "postalCode": "63138",
+            "country": "USA"
+          }
+        ],
+        "partOf": {
+          "reference": "Organization/mercy-health-system",
+          "display": "Mercy Health System"
+        }
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Organization/mercy-clinic-north"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:healthtech-partners",
+      "resource": {
+        "resourceType": "Organization",
+        "id": "healthtech-partners",
+        "extension": [
+          {
+            "url": "https://sequoiaproject.org/fhir/sphd/StructureDefinition/Domains",
+            "valueCoding": {
+              "system": "https://sequoiaproject.org/fhir/sphd/CodeSystem/Domains",
+              "code": "RCE",
+              "display": "RCE"
+            }
+          },
+          {
+            "url": "https://sequoiaproject.org/fhir/sphd/StructureDefinition/DelegationRole",
+            "valueCoding": {
+              "system": "https://sequoiaproject.org/fhir/sphd/CodeSystem/DelegationRoleCodes",
+              "code": "Delegate",
+              "display": "Delegate"
+            }
+          }
+        ],
+        "identifier": [
+          {
+            "use": "official",
+            "type": {
+              "coding": [
+                {
+                  "system": "https://sequoiaproject.org/fhir/sphd/CodeSystem/SequoiaIdentifierCodes",
+                  "code": "HCID"
+                }
+              ],
+              "text": "HCID"
+            },
+            "system": "http://www.hl7.org/oid/",
+            "value": "2.16.840.1.113883.3.HEALTHTECH-PARTNERS"
+          }
+        ],
+        "active": true,
+        "type": [
+          {
+            "text": "Tech Partner"
+          }
+        ],
+        "name": "HealthTech Partners LLC",
+        "address": [
+          {
+            "use": "work",
+            "line": ["2200 Silicon Way", "Suite 400"],
+            "city": "Austin",
+            "state": "TX",
+            "postalCode": "78701",
+            "country": "USA"
+          }
+        ]
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Organization/healthtech-partners"
+      }
+    }
+  ]
+}

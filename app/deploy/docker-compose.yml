@@ -1,0 +1,61 @@
+# Production stack: HAPI FHIR + Postgres + Caddy (reverse proxy + static).
+# Run from this directory on the EC2 host:  docker compose up -d
+#
+# Caddy serves the React build from ./web at "/", and reverse-proxies "/fhir"
+# to the HAPI container. Basic auth on "/fhir" is enforced by the Caddyfile.
+
+services:
+  postgres:
+    image: postgres:15
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: hapi
+      POSTGRES_USER: hapi
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U hapi -d hapi"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  hapi:
+    image: hapiproject/hapi:latest
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/hapi
+      SPRING_DATASOURCE_USERNAME: hapi
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
+      SPRING_DATASOURCE_DRIVER_CLASS_NAME: org.postgresql.Driver
+      SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT: ca.uhn.fhir.jpa.model.dialect.HapiFhirPostgresDialect
+      HAPI_FHIR_FHIR_VERSION: R4
+      # Allow the directory app's create / update flows
+      HAPI_FHIR_ALLOW_MULTIPLE_DELETE: "true"
+      HAPI_FHIR_ALLOW_EXTERNAL_REFERENCES: "true"
+    volumes:
+      - hapi-data:/data/hapi
+    # No ports exposed — Caddy reaches HAPI on the internal Docker network only.
+
+  caddy:
+    image: caddy:2
+    restart: unless-stopped
+    depends_on:
+      - hapi
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./web:/srv/web:ro
+      - caddy-data:/data
+      - caddy-config:/config
+
+volumes:
+  postgres-data:
+  hapi-data:
+  caddy-data:
+  caddy-config:
