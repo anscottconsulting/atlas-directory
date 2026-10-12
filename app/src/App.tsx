@@ -5,6 +5,13 @@ import HierarchyPage from "./pages/HierarchyPage";
 import DirectoryListPage from "./pages/DirectoryListPage";
 import OrganizationDetailPage from "./pages/OrganizationDetailPage";
 import OrganizationFormPage from "./pages/OrganizationFormPage";
+import VerifyLayout from "./pages/verification/VerifyLayout";
+import OverviewPage from "./pages/verification/OverviewPage";
+import QueuePage from "./pages/verification/QueuePage";
+import EntryPage from "./pages/verification/EntryPage";
+import { IssuesListPage, IssueDetailPage } from "./pages/verification/IssuesPage";
+import QualityPage from "./pages/verification/QualityPage";
+import SubmitterPage from "./pages/verification/SubmitterPage";
 
 export default function App() {
   return (
@@ -22,6 +29,15 @@ export default function App() {
           path="organization/:id/edit"
           element={<OrganizationFormPage />}
         />
+        <Route path="verify" element={<VerifyLayout />}>
+          <Route index element={<OverviewPage />} />
+          <Route path="queue" element={<QueuePage />} />
+          <Route path="entry/:id" element={<EntryPage />} />
+          <Route path="issues" element={<IssuesListPage />} />
+          <Route path="issues/:id" element={<IssueDetailPage />} />
+          <Route path="quality" element={<QualityPage />} />
+          <Route path="submitter" element={<SubmitterPage />} />
+        </Route>
         <Route path="*" element={<Navigate to="/" replace />} />
       </Route>
     </Routes>

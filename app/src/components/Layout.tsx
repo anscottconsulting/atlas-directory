@@ -5,6 +5,7 @@ const navItems = [
   { to: "/", label: "Dashboard", end: true },
   { to: "/hierarchy", label: "Hierarchy" },
   { to: "/directory", label: "Directory" },
+  { to: "/verify", label: "Validation" },
 ];
 
 export default function Layout() {
