@@ -39,13 +39,17 @@ export const STAGES = [
   { name: "Determination and notice", detail: "Result written to directory flag and sent to submitter", state: "1,512 sent" },
 ];
 
+// Clarifications go to partial or unable entries; evidence requests go to
+// verified entries whose covered-entity check came up short. Columns sum to RUN.
 export const SUBMITTERS = [
-  { name: "Clearpath Health Network", total: 612, verified: 541, partial: 68, unable: 3, open: 41, oldest: "9 days" },
-  { name: "Northgate HIE Services", total: 488, verified: 409, partial: 77, unable: 2, open: 52, oldest: "14 days" },
-  { name: "Bluestem Clinical Systems", total: 431, verified: 362, partial: 66, unable: 3, open: 38, oldest: "6 days" },
-  { name: "Meridian Exchange Partners", total: 377, verified: 312, partial: 63, unable: 2, open: 29, oldest: "11 days" },
-  { name: "Lakeshore Interop Group", total: 277, verified: 202, partial: 74, unable: 1, open: 47, oldest: "21 days" },
+  { name: "Clearpath Health Network", total: 612, verified: 541, partial: 68, unable: 3, clarifications: 41, evidence: 88, oldest: "9 days" },
+  { name: "Northgate HIE Services", total: 488, verified: 409, partial: 77, unable: 2, clarifications: 52, evidence: 70, oldest: "14 days" },
+  { name: "Bluestem Clinical Systems", total: 431, verified: 362, partial: 66, unable: 3, clarifications: 38, evidence: 62, oldest: "6 days" },
+  { name: "Meridian Exchange Partners", total: 377, verified: 312, partial: 63, unable: 2, clarifications: 29, evidence: 54, oldest: "11 days" },
+  { name: "Lakeshore Interop Group", total: 277, verified: 202, partial: 74, unable: 1, clarifications: 47, evidence: 40, oldest: "21 days" },
 ];
+
+const NORTHGATE = SUBMITTERS[1];
 
 export const QUEUE: QueueEntry[] = [
   { id: "VR-0004187", org: "Riverbend Family Medicine", npi: "1295837461", candidate: "Riverbend Health Partners PLLC", candidateNpi: "1730582914", confidence: "High", status: "partial", reasonKey: "npi-billing", reason: "Supplied NPI differs from billing NPI at same address", submitter: "Northgate HIE Services", ageDays: 3, entryType: "Organization" },
@@ -170,22 +174,84 @@ export const ISSUES: Issue[] = [
 ];
 
 export const SUBMITTER_VIEW = {
-  submitter: "Northgate HIE Services",
-  total: 488,
-  verified: 409,
-  needAnswer: 52,
-  underReview: 27,
+  submitter: NORTHGATE.name,
+  total: NORTHGATE.total,
+  verified: NORTHGATE.verified,
+  clarifications: NORTHGATE.clarifications,
+  evidence: NORTHGATE.evidence,
+  // Partial or unable entries with no question out to the submitter.
+  underReview: NORTHGATE.partial + NORTHGATE.unable - NORTHGATE.clarifications,
   items: [
-    { id: "VR-0004334", org: "Greenway Community Clinic", dueDays: 4, ask: "Covered-entity status: claims data was below the threshold. Evidence needed.", kind: "evidence" as const },
-    { id: "VR-0004271", org: "Prairie View Health", dueDays: 6, ask: "Two organizations share this name in different states. Which one is yours?", kind: "clarify" as const },
-    { id: "VR-0004348", org: "Stonebridge Physical Therapy", dueDays: 9, ask: "The address on the entry is a billing office. Please give the service location.", kind: "clarify" as const },
-    { id: "VR-0004355", org: "Elm Street Health Center", dueDays: 12, ask: "Listed as an organization, but the NPI belongs to an individual.", kind: "clarify" as const },
+    {
+      id: "VR-0004334",
+      org: "Greenfield Community Clinic",
+      dueDays: 4,
+      ask: "Covered-entity status: claims data was below the threshold. Evidence needed.",
+      kind: "evidence" as const,
+      intro:
+        "We confirmed who this organization is, but claims data wasn't enough to confirm covered-entity status. Tell us which applies and attach evidence. Nothing changes on the connection while this is open.",
+      form: { name: "Greenfield Community Clinic", npi: "1518703926", address: "88 Hillcrest Road, Columbia, TN 38401", entryType: "Organization" },
+      question: {
+        title: "Which describes this organization?",
+        options: [
+          { label: "HIPAA covered entity", hint: "Provider that bills electronically, health plan, or clearinghouse" },
+          { label: "Provider, not a covered entity", hint: "Delivers treatment but doesn't bill electronically" },
+        ],
+      },
+    },
+    {
+      id: "VR-0004271",
+      org: "Prairie View Health",
+      dueDays: 6,
+      ask: "Two organizations share this name in different states. Which one is yours?",
+      kind: "clarify" as const,
+      intro:
+        "Two organizations in the NPI registry are named Prairie View Health, and the entry doesn't tell us which one it is. Pick the one your organization manages so we can match the right record.",
+      form: { name: "Prairie View Health", npi: "", address: "", entryType: "Organization" },
+      question: {
+        title: "Which organization is yours?",
+        options: [
+          { label: "Prairie View Health · NPI 1720485519", hint: "1400 University Drive, Prairie View, TX 77446" },
+          { label: "Prairie View Health · NPI 1366972108", hint: "215 E Kansas Avenue, Newton, KS 67114" },
+          { label: "Neither of these", hint: "We'll follow up to find the right record" },
+        ],
+      },
+    },
+    {
+      id: "VR-0004348",
+      org: "Stonebridge Physical Therapy",
+      dueDays: 9,
+      ask: "The address on the entry is a billing office. Please give the service location.",
+      kind: "clarify" as const,
+      intro:
+        "The address on this entry matches a billing office, not a place where patients are seen. Update the address above to the service location, or tell us if care is delivered at this address too.",
+      form: { name: "Stonebridge Physical Therapy", npi: "1891047326", address: "PO Box 2280, Springfield, IL 62705", entryType: "Organization" },
+      question: {
+        title: "Where is care delivered?",
+        options: [
+          { label: "At a different address", hint: "I've updated the address above to the service location" },
+          { label: "At this address too", hint: "Patients are seen at the address on file" },
+        ],
+      },
+    },
+    {
+      id: "VR-0004355",
+      org: "Elm Street Health Center",
+      dueDays: 12,
+      ask: "Listed as an organization, but the NPI belongs to an individual.",
+      kind: "clarify" as const,
+      intro:
+        "This entry is listed as an organization, but its NPI is registered to an individual practitioner. Either give the organization's own NPI above, or change the entry type to Practitioner.",
+      form: { name: "Elm Street Health Center", npi: "1235186042", address: "410 Elm Street, Burlington, VT 05401", entryType: "Organization" },
+      question: {
+        title: "What is this entry?",
+        options: [
+          { label: "An organization", hint: "I've replaced the NPI above with the organization's NPI" },
+          { label: "An individual practitioner", hint: "I've changed the entry type above to Practitioner" },
+        ],
+      },
+    },
   ],
-  form: {
-    id: "VR-0004334",
-    name: "Greenway Community Clinic",
-    npi: "1518703926",
-    address: "88 Hillcrest Road, Columbia, TN 38401",
-    entryType: "Organization",
-  },
 };
+
+export type SubmitterItem = (typeof SUBMITTER_VIEW.items)[number];

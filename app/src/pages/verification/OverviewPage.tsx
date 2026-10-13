@@ -111,7 +111,8 @@ export default function OverviewPage() {
                 <th className="px-4 py-2 text-right font-medium">Verified</th>
                 <th className="px-4 py-2 text-right font-medium">Partial</th>
                 <th className="px-4 py-2 text-right font-medium">Unable</th>
-                <th className="px-4 py-2 text-right font-medium">Open issues</th>
+                <th className="px-4 py-2 text-right font-medium">Clarifications</th>
+                <th className="px-4 py-2 text-right font-medium">Evidence requests</th>
                 <th className="px-4 py-2 font-medium">Oldest open</th>
               </tr>
             </thead>
@@ -129,7 +130,8 @@ export default function OverviewPage() {
                   </td>
                   <td className="px-4 py-2 text-right font-mono">{s.partial}</td>
                   <td className="px-4 py-2 text-right font-mono">{s.unable}</td>
-                  <td className="px-4 py-2 text-right font-mono">{s.open}</td>
+                  <td className="px-4 py-2 text-right font-mono">{s.clarifications}</td>
+                  <td className="px-4 py-2 text-right font-mono">{s.evidence}</td>
                   <td className="px-4 py-2 text-slate-600">{s.oldest}</td>
                 </tr>
               ))}

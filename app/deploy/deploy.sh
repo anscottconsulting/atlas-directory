@@ -34,8 +34,17 @@ rsync -avz --delete -e "$RSYNC_SSH" \
 
 echo "==> Syncing compose files"
 rsync -avz -e "$RSYNC_SSH" \
-  deploy/docker-compose.yml deploy/Caddyfile \
+  deploy/docker-compose.yml \
   "$EC2_HOST:$REMOTE_DIR/"
+
+# deploy/Caddyfile is the committed template (placeholder domain and hash).
+# The live config is deploy/Caddyfile.local (gitignored); push that one.
+if [[ ! -f deploy/Caddyfile.local ]]; then
+  echo "ERROR: deploy/Caddyfile.local not found. Refusing to push the template Caddyfile." >&2
+  exit 1
+fi
+rsync -avz -e "$RSYNC_SSH" \
+  deploy/Caddyfile.local "$EC2_HOST:$REMOTE_DIR/Caddyfile"
 
 # Only push .env the first time; protect it after that.
 if ! ssh "${SSH_OPTS[@]}" "$EC2_HOST" "test -f $REMOTE_DIR/.env"; then
