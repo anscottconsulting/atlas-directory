@@ -12,6 +12,13 @@ export default defineConfig({
         target: "http://localhost:8081",
         changeOrigin: true,
       },
+      // NPPES NPI Registry. It sends no CORS headers, so the browser can't
+      // call it directly; Caddy does the same thing in production.
+      "/nppes": {
+        target: "https://npiregistry.cms.hhs.gov",
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/nppes/, ""),
+      },
     },
   },
 });

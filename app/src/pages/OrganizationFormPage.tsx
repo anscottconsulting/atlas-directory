@@ -16,6 +16,8 @@ import {
   setRole,
   type RceRole,
 } from "../lib/rce-profiles";
+import { isValidNpi, NPI_SYSTEM } from "../lib/verification/rules";
+import { EIN_SYSTEM, einFormatProblem } from "../lib/verification/identity";
 import ErrorBanner from "../components/ErrorBanner";
 import Spinner from "../components/Spinner";
 
@@ -26,6 +28,8 @@ interface FormState {
   name: string;
   active: boolean;
   tefcaId: string;
+  npi: string;
+  ein: string;
   partOfId: string;
   endpointName: string;
   endpointAddress: string;
@@ -37,6 +41,8 @@ const EMPTY: FormState = {
   name: "",
   active: true,
   tefcaId: "",
+  npi: "",
+  ein: "",
   partOfId: "",
   endpointName: "",
   endpointAddress: "",
@@ -57,6 +63,9 @@ function validate(state: FormState): Record<string, string> {
   const errors: Record<string, string> = {};
   if (!state.name.trim()) errors.name = "Name is required";
   if (!state.tefcaId.trim()) errors.tefcaId = "TEFCA ID is required";
+  if (state.npi.trim() && !isValidNpi(state.npi.trim())) errors.npi = "Not a valid NPI (10 digits, with check digit)";
+  const einProblem = state.ein.trim() ? einFormatProblem(state.ein) : null;
+  if (einProblem) errors.ein = einProblem;
 
   if (RULES.allowsPartOf(state.role)) {
     if (state.role === "Participant" && !state.partOfId) {
@@ -96,11 +105,13 @@ function stateToOrg(state: FormState, existing?: fhir4.Organization): fhir4.Orga
   org.active = state.active;
 
   const others = (org.identifier ?? []).filter(
-    (i) => i.system !== TEFCAID_SYSTEM,
+    (i) => i.system !== TEFCAID_SYSTEM && i.system !== NPI_SYSTEM && i.system !== EIN_SYSTEM,
   );
   org.identifier = [
     ...others,
     { system: TEFCAID_SYSTEM, value: state.tefcaId.trim() },
+    ...(state.npi.trim() ? [{ system: NPI_SYSTEM, value: state.npi.trim() }] : []),
+    ...(state.ein.trim() ? [{ system: EIN_SYSTEM, value: state.ein.trim() }] : []),
   ];
 
   if (RULES.allowsPartOf(state.role) && state.partOfId) {
@@ -161,6 +172,8 @@ function orgToState(org: fhir4.Organization): FormState {
     active: org.active !== false,
     tefcaId:
       org.identifier?.find((i) => i.system === TEFCAID_SYSTEM)?.value ?? "",
+    npi: org.identifier?.find((i) => i.system === NPI_SYSTEM)?.value ?? "",
+    ein: org.identifier?.find((i) => i.system === EIN_SYSTEM)?.value ?? "",
     partOfId: partOfId(org) ?? "",
     endpointName: ep?.name ?? "",
     endpointAddress: ep?.address ?? "",
@@ -284,6 +297,30 @@ export default function OrganizationFormPage() {
             />
             {errors.tefcaId && (
               <p className="mt-1 text-xs text-red-600">{errors.tefcaId}</p>
+            )}
+          </div>
+          <div>
+            <label className="label">NPI (optional)</label>
+            <input
+              className="input font-mono"
+              value={state.npi}
+              onChange={(e) => set("npi", e.target.value)}
+              placeholder="10 digits"
+            />
+            {errors.npi && (
+              <p className="mt-1 text-xs text-red-600">{errors.npi}</p>
+            )}
+          </div>
+          <div>
+            <label className="label">EIN (optional)</label>
+            <input
+              className="input font-mono"
+              value={state.ein}
+              onChange={(e) => set("ein", e.target.value)}
+              placeholder="NN-NNNNNNN"
+            />
+            {errors.ein && (
+              <p className="mt-1 text-xs text-red-600">{errors.ein}</p>
             )}
           </div>
           <div>

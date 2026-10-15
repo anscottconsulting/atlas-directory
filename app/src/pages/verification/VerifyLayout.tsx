@@ -6,7 +6,8 @@ const tabs = [
   { to: "/verify/queue", label: "Queue", count: RUN.partial + RUN.unable },
   { to: "/verify/issues", label: "Issues", count: ISSUES.length },
   { to: "/verify/quality", label: "Data quality" },
-  { to: "/verify/submitter", label: "Submitter view" },
+  { to: "/verify/submitter-level-1", label: "Submitter Level 1 Validation" },
+  { to: "/verify/submitter", label: "Submitter Level 2 Validation" },
 ];
 
 export default function VerifyLayout() {

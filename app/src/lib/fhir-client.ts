@@ -103,6 +103,26 @@ export const fhir = {
   remove: (resourceType: string, id: string): Promise<void> =>
     request<void>(`/${resourceType}/${id}`, { method: "DELETE" }),
 
+  /**
+   * Validate a resource against a profile ($validate). Returns the
+   * OperationOutcome; servers may answer a failing resource with a 4xx, so
+   * an outcome carried on the error is returned instead of thrown.
+   */
+  validate: async (
+    resource: fhir4.Resource,
+    profile: string,
+  ): Promise<fhir4.OperationOutcome> => {
+    try {
+      return await request<fhir4.OperationOutcome>(
+        `/${resource.resourceType}/$validate?profile=${encodeURIComponent(profile)}`,
+        { method: "POST", body: JSON.stringify(resource) },
+      );
+    } catch (e) {
+      if (e instanceof FhirError && e.outcome) return e.outcome;
+      throw e;
+    }
+  },
+
   /** POST a transaction Bundle. */
   transaction: (bundle: fhir4.Bundle): Promise<fhir4.Bundle> =>
     request<fhir4.Bundle>("", {

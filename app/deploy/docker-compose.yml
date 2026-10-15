@@ -36,8 +36,31 @@ services:
       # Allow the directory app's create / update flows
       HAPI_FHIR_ALLOW_MULTIPLE_DELETE: "true"
       HAPI_FHIR_ALLOW_EXTERNAL_REFERENCES: "true"
+      # Level 1 validation: Organization/$validate against the RCE profiles.
+      # Both packages load from ./igs (synced by deploy.sh). Dependency fetching
+      # stays off: RCE names its SPHD dependency "#dev", which doesn't resolve,
+      # and pulling US Core's tree runs HAPI out of memory on a 2 GB box.
+      # Only profiles and terminology are installed: SPHD's managingOrg
+      # SearchParameter crashes HAPI when indexing new Organizations.
+      HAPI_FHIR_IMPLEMENTATIONGUIDES_SPHD_NAME: sequoia.fhir.us.sphd.r4
+      HAPI_FHIR_IMPLEMENTATIONGUIDES_SPHD_VERSION: 1.13.0
+      HAPI_FHIR_IMPLEMENTATIONGUIDES_SPHD_PACKAGEURL: file:///igs/sphd.tgz
+      HAPI_FHIR_IMPLEMENTATIONGUIDES_SPHD_INSTALLMODE: STORE_AND_INSTALL
+      HAPI_FHIR_IMPLEMENTATIONGUIDES_SPHD_FETCHDEPENDENCIES: "false"
+      HAPI_FHIR_IMPLEMENTATIONGUIDES_SPHD_RELOADEXISTING: "false"
+      HAPI_FHIR_IMPLEMENTATIONGUIDES_SPHD_INSTALLRESOURCETYPES: StructureDefinition,ValueSet,CodeSystem
+      HAPI_FHIR_IMPLEMENTATIONGUIDES_RCE_NAME: sequoia.fhir.us.rce.r4
+      HAPI_FHIR_IMPLEMENTATIONGUIDES_RCE_VERSION: 1.12.0
+      HAPI_FHIR_IMPLEMENTATIONGUIDES_RCE_PACKAGEURL: file:///igs/rce.tgz
+      HAPI_FHIR_IMPLEMENTATIONGUIDES_RCE_INSTALLMODE: STORE_AND_INSTALL
+      HAPI_FHIR_IMPLEMENTATIONGUIDES_RCE_FETCHDEPENDENCIES: "false"
+      HAPI_FHIR_IMPLEMENTATIONGUIDES_RCE_RELOADEXISTING: "false"
+      HAPI_FHIR_IMPLEMENTATIONGUIDES_RCE_INSTALLRESOURCETYPES: StructureDefinition,ValueSet,CodeSystem
+      # The validator needs ~1 GB of heap; the JVM default (1/4 of RAM) is too small.
+      JAVA_TOOL_OPTIONS: -Xmx1g
     volumes:
       - hapi-data:/data/hapi
+      - ./igs:/igs:ro
     # No ports exposed — Caddy reaches HAPI on the internal Docker network only.
 
   caddy:

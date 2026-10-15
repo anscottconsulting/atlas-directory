@@ -26,7 +26,7 @@ echo "==> Building React app"
 npm run build
 
 echo "==> Ensuring remote directory exists"
-ssh "${SSH_OPTS[@]}" "$EC2_HOST" "mkdir -p $REMOTE_DIR/web"
+ssh "${SSH_OPTS[@]}" "$EC2_HOST" "mkdir -p $REMOTE_DIR/web $REMOTE_DIR/igs"
 
 echo "==> Syncing static build to $EC2_HOST:$REMOTE_DIR/web/"
 rsync -avz --delete -e "$RSYNC_SSH" \
@@ -36,6 +36,11 @@ echo "==> Syncing compose files"
 rsync -avz -e "$RSYNC_SSH" \
   deploy/docker-compose.yml \
   "$EC2_HOST:$REMOTE_DIR/"
+
+echo "==> Syncing IG packages (loaded by HAPI for \$validate)"
+rsync -avz -e "$RSYNC_SSH" \
+  ../sandbox/rce.tgz ../sandbox/sphd.tgz \
+  "$EC2_HOST:$REMOTE_DIR/igs/"
 
 # deploy/Caddyfile is the committed template (placeholder domain and hash).
 # The live config is deploy/Caddyfile.local (gitignored); push that one.

@@ -8,14 +8,25 @@
 your-domain.example.com {
 	encode gzip
 
-	# Basic auth on the FHIR endpoint only. Generate a bcrypt hash with:
+	# Basic auth on the API paths: FHIR and the NPPES proxy. Generate a bcrypt hash with:
 	#   docker run --rm caddy:2 caddy hash-password --plaintext 'your-password'
 	# Then paste the hash below (it starts with $2a$ or $2b$).
+	@api path /fhir/* /nppes/*
+	basicauth @api {
+		admin $2a$14$REPLACE_ME_WITH_A_REAL_BCRYPT_HASH
+	}
+
 	handle /fhir/* {
-		basicauth {
-			admin $2a$14$REPLACE_ME_WITH_A_REAL_BCRYPT_HASH
-		}
 		reverse_proxy hapi:8080
+	}
+
+	# NPPES NPI Registry, for Level 2 NPI lookups. The registry sends no CORS
+	# headers, so the browser calls it through here. Kept behind basic auth so
+	# the box isn't an open proxy.
+	handle_path /nppes/* {
+		reverse_proxy https://npiregistry.cms.hhs.gov {
+			header_up Host {upstream_hostport}
+		}
 	}
 
 	# React SPA — serve static files, fall back to index.html for client routing.

@@ -39,7 +39,8 @@ export interface QueueEntry {
   entryType: EntryType;
 }
 
-export type CheckResult = "pass" | "question" | "not-run";
+/** evidence: nothing wrong, but it can only be confirmed with a document from the submitter. */
+export type CheckResult = "pass" | "question" | "fail" | "evidence" | "not-run";
 
 export interface SupportingCheck {
   name: string;

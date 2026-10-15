@@ -12,6 +12,7 @@ import EntryPage from "./pages/verification/EntryPage";
 import { IssuesListPage, IssueDetailPage } from "./pages/verification/IssuesPage";
 import QualityPage from "./pages/verification/QualityPage";
 import SubmitterPage from "./pages/verification/SubmitterPage";
+import SubmitterLevel1Page from "./pages/verification/SubmitterLevel1Page";
 
 export default function App() {
   return (
@@ -37,6 +38,7 @@ export default function App() {
           <Route path="issues/:id" element={<IssueDetailPage />} />
           <Route path="quality" element={<QualityPage />} />
           <Route path="submitter" element={<SubmitterPage />} />
+          <Route path="submitter-level-1" element={<SubmitterLevel1Page />} />
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />
       </Route>

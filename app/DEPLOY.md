@@ -58,6 +58,25 @@ Log out and back in so the group membership takes effect, then verify:
 docker compose version
 ```
 
+### Add a swap file
+
+HAPI needs about 1.1 GB once it has loaded the RCE profiles for Level 1
+validation, which leaves a `t4g.small` with very little free memory and no
+swap. A 2 GB swap file lets a memory spike spill to disk instead of the
+kernel killing a container:
+
+```bash
+sudo fallocate -l 2G /swapfile
+sudo chmod 600 /swapfile
+sudo mkswap /swapfile
+sudo swapon /swapfile
+echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab   # keep it after reboots
+free -m                                                      # Swap line should show 2047
+```
+
+Swap is much slower than RAM. If the site gets sluggish and `free -m` shows
+swap in steady use, move to a `t4g.medium` (4 GB) instead.
+
 ## 3. Generate the basic-auth password hash
 
 On your laptop (anywhere with Docker):
@@ -99,9 +118,10 @@ EC2_HOST=ec2-user@<public-ip> ./deploy/deploy.sh
 EC2_HOST=ec2-user@<public-ip> SSH_KEY=~/.ssh/your-key.pem ./deploy/deploy.sh
 ```
 
-The script runs `npm run build`, rsyncs the static build + compose files to
-the box, and runs `docker compose up -d`. First run takes a few minutes
-because Docker has to pull the HAPI image (~500 MB).
+The script runs `npm run build`, rsyncs the static build, compose files and
+the RCE/SPHD IG packages (from `../sandbox/`) to the box, and runs
+`docker compose up -d`. First run takes a few minutes because Docker has to
+pull the HAPI image (~500 MB), and HAPI installs the IG packages on startup.
 
 ## 7. Verify
 

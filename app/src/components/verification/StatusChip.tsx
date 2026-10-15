@@ -36,6 +36,8 @@ export function StatusChip({ status, short = false }: { status: MatchStatus; sho
 const CHECK: Record<CheckResult, { label: string; cls: string }> = {
   pass: { label: "Pass", cls: "text-emerald-700" },
   question: { label: "Question", cls: "text-amber-700" },
+  fail: { label: "Fail", cls: "text-red-700" },
+  evidence: { label: "Evidence", cls: "text-sky-700" },
   "not-run": { label: "Not run", cls: "text-slate-500" },
 };
 
@@ -46,6 +48,8 @@ export function CheckChip({ result }: { result: CheckResult }) {
       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" aria-hidden="true">
         {result === "pass" && <path d="M5 12l5 5 9-10" />}
         {result === "question" && <path d="M12 4l9 16H3z" />}
+        {result === "fail" && <path d="M7 7l10 10M17 7L7 17" />}
+        {result === "evidence" && <path d="M7 3h7l5 5v13H7z" />}
         {result === "not-run" && <circle cx="12" cy="12" r="8" />}
       </svg>
       {c.label}

@@ -56,7 +56,7 @@ export function IssuesListPage() {
 
 const STEPS: { key: IssueStep; title: string; hint: string }[] = [
   { key: "review", title: "1. Review the issue", hint: "Partial: one specific question. Unable: manual review with reason." },
-  { key: "clarification", title: "2. Clarification", hint: "Confirm or correct name, NPI, address or entry type." },
+  { key: "clarification", title: "2. Clarification", hint: "Confirm or correct name, NPI, address or entry type. Request supporting evidence." },
   { key: "recheck", title: "3. Recheck the entry", hint: "Same record ID, rerun matching and checks." },
   { key: "closed", title: "4. Close out", hint: "Share the result and document the resolution." },
 ];
@@ -65,6 +65,10 @@ export function IssueDetailPage() {
   const { id } = useParams();
   const issue = ISSUES.find((i) => i.id === id);
   const [step, setStep] = useState<IssueStep>(issue?.step ?? "review");
+  // The step an issue was on when it went to policy review, so the tracker
+  // keeps showing where it stopped and it can go back there.
+  const [escalatedFrom, setEscalatedFrom] = useState<IssueStep>(issue?.step === "policy" ? "recheck" : issue?.step ?? "review");
+  const [rerunDone, setRerunDone] = useState(false);
   const [owner, setOwner] = useState(issue?.owner ?? "Unassigned");
   const [failNotice, setFailNotice] = useState<"call" | "written">("call");
   const [reply, setReply] = useState("");
@@ -78,7 +82,13 @@ export function IssueDetailPage() {
     );
   }
 
-  const currentIndex = STEPS.findIndex((s) => s.key === step);
+  const inPolicy = step === "policy";
+  const currentIndex = STEPS.findIndex((s) => s.key === (inPolicy ? escalatedFrom : step));
+  const goTo = (next: IssueStep) => {
+    if (next === "policy") setEscalatedFrom(step);
+    setRerunDone(false);
+    setStep(next);
+  };
 
   return (
     <div className="space-y-5">
@@ -94,42 +104,75 @@ export function IssueDetailPage() {
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
-          <button type="button" className="btn-secondary" onClick={() => setStep("policy")} disabled={step === "policy"}>
-            Send to policy review
-          </button>
-          {step === "recheck" && (
-            <button type="button" className="btn-primary" onClick={() => setStep("closed")}>Apply correction and rerun</button>
+          {step === "clarification" && (
+            <button type="button" className="btn-secondary" onClick={() => goTo("recheck")}>Move to recheck</button>
+          )}
+          {step !== "policy" && step !== "closed" && (
+            <button type="button" className="btn-secondary" onClick={() => goTo("policy")}>Send to policy review</button>
           )}
         </div>
       </header>
 
-      {step === "policy" ? (
-        <div className="rounded-lg border border-slate-300 bg-slate-50 px-5 py-4 text-sm">
-          <span className="font-semibold">In policy review.</span> The issue stays open with its evidence until a rule is set.{" "}
-          <button type="button" className="underline" onClick={() => setStep(issue.step)}>Undo</button>
+      {inPolicy && (
+        <div className="rounded-lg border border-amber-300 bg-amber-50 px-5 py-4 text-sm">
+          <span className="font-semibold">In manual / policy review.</span> Sent from "{STEPS[currentIndex].title}". The issue stays open
+          with its evidence until a rule is set.{" "}
+          <button type="button" className="underline" onClick={() => setStep(escalatedFrom)}>
+            Return to {STEPS[currentIndex].title.replace(/^\d+\. /, "").toLowerCase()}
+          </button>
         </div>
-      ) : (
-        <ol aria-label="Resolution steps" className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
-          {STEPS.map((s, i) => {
-            const done = i < currentIndex || step === "closed";
-            const current = i === currentIndex && step !== "closed";
-            return (
-              <li
-                key={s.key}
-                aria-current={current ? "step" : undefined}
-                className={`rounded-lg p-3.5 ${
-                  current ? "bg-white ring-2 ring-slate-900" : done ? "bg-white ring-1 ring-slate-200" : "border border-dashed border-slate-300"
-                }`}
-              >
-                <div className={`text-xs font-medium ${done ? "text-emerald-700" : current ? "text-slate-900" : "text-slate-400"}`}>
-                  {done ? "Done" : current ? "Current" : "Next"}
-                </div>
-                <div className="text-sm font-semibold">{s.title}</div>
-                <div className="text-xs text-slate-500">{s.hint}</div>
-              </li>
-            );
-          })}
-        </ol>
+      )}
+
+      <ol aria-label="Resolution steps" className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
+        {STEPS.map((s, i) => {
+          const done = i < currentIndex || step === "closed";
+          const current = i === currentIndex && step !== "closed";
+          const label = done ? "Done" : current ? (inPolicy ? "Paused · in policy review" : "Current") : "Next";
+          return (
+            <li
+              key={s.key}
+              aria-current={current ? "step" : undefined}
+              className={`rounded-lg p-3.5 ${
+                current
+                  ? inPolicy
+                    ? "bg-white ring-2 ring-amber-500"
+                    : "bg-white ring-2 ring-slate-900"
+                  : done
+                    ? "bg-white ring-1 ring-slate-200"
+                    : "border border-dashed border-slate-300"
+              }`}
+            >
+              <div className={`text-xs font-medium ${done ? "text-emerald-700" : current ? (inPolicy ? "text-amber-700" : "text-slate-900") : "text-slate-400"}`}>
+                {label}
+              </div>
+              <div className="text-sm font-semibold">{s.title}</div>
+              <div className="text-xs text-slate-500">{s.hint}</div>
+            </li>
+          );
+        })}
+      </ol>
+
+      {step === "recheck" && (
+        <section className="card space-y-3 p-5">
+          {!rerunDone ? (
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <p className="text-sm text-slate-600">Apply the proposed correction to the same record ID, then rerun matching and the supporting checks.</p>
+              <button type="button" className="btn-primary" onClick={() => setRerunDone(true)}>Apply correction and rerun</button>
+            </div>
+          ) : (
+            <>
+              <div>
+                <h2 className="font-semibold">Issue resolved?</h2>
+                <p className="text-sm text-slate-600">Rerun finished. Review the new matching result and evidence, then decide.</p>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <button type="button" className="btn-primary" onClick={() => goTo("closed")}>Yes, close out</button>
+                <button type="button" className="btn-secondary" onClick={() => goTo("clarification")}>More evidence needed</button>
+                <button type="button" className="btn-secondary" onClick={() => goTo("policy")}>No, send to manual / policy review</button>
+              </div>
+            </>
+          )}
+        </section>
       )}
 
       <div className="grid gap-4 lg:grid-cols-3">
